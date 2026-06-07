@@ -4,9 +4,10 @@
   functions = "netlify/functions"
 
 [[redirects]]
-  from = "/.netlify/functions/*"
-  to = "/.netlify/functions/:splat"
+  from = "/api/scout"
+  to = "/.netlify/functions/scout"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
