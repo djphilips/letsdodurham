@@ -1,28 +1,28 @@
 // netlify/functions/scout.js
-// Serverless proxy: keeps the Anthropic API key server-side, away from the browser.
-// The key is read from the ANTHROPIC_API_KEY environment variable you set in Netlify.
+// Netlify Functions v2 format (default export, standard Request/Response).
 
-export async function handler(event) {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+export default async (req) => {
+  if (req.method !== "POST") {
+    return new Response("Method Not Allowed", { status: 405 });
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "ANTHROPIC_API_KEY is not set in Netlify environment variables." }),
-    };
+    return Response.json(
+      { error: "ANTHROPIC_API_KEY is not set in Netlify environment variables." },
+      { status: 500 }
+    );
   }
 
   let prompt;
   try {
-    ({ prompt } = JSON.parse(event.body || "{}"));
+    const body = await req.json();
+    prompt = body.prompt;
   } catch {
-    return { statusCode: 400, body: JSON.stringify({ error: "Invalid JSON body." }) };
+    return Response.json({ error: "Invalid JSON body." }, { status: 400 });
   }
   if (!prompt) {
-    return { statusCode: 400, body: JSON.stringify({ error: "Missing prompt." }) };
+    return Response.json({ error: "Missing prompt." }, { status: 400 });
   }
 
   try {
@@ -42,15 +42,11 @@ export async function handler(event) {
     });
 
     const data = await res.json();
-    return {
-      statusCode: res.status,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    };
+    return Response.json(data, { status: res.status });
   } catch (err) {
-    return {
-      statusCode: 502,
-      body: JSON.stringify({ error: "Upstream request failed.", detail: String(err) }),
-    };
+    return Response.json(
+      { error: "Upstream request failed.", detail: String(err) },
+      { status: 502 }
+    );
   }
-}
+};
