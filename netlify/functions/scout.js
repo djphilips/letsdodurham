@@ -50,4 +50,9 @@ export default async (req) => {
     );
   }
 };
-export const config = { path: "/api/scout" };
+return Response.json(
+      { error: "Upstream request failed.", detail: String(err) },
+      { status: 502 }
+    );
+  }
+};
