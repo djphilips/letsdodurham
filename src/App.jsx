@@ -194,7 +194,7 @@ export default function App() {
     setEvents([]);
     setActiveCluster(null);
     try {
-       const res = await fetch("/api/scout", {
+       const res = await fetch("/nf-functions/scout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
